@@ -1,0 +1,39 @@
+.admin-login, .admin-panel {
+    padding: 20px;
+    max-width: 500px;
+    margin: auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  .admin-login input,
+  .admin-section input {
+    display: block;
+    margin: 10px 0;
+    padding: 10px;
+    width: 100%;
+  }
+  
+  .admin-login button,
+  .admin-section button {
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  
+  .admin-section {
+    margin-top: 30px;
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
+  }
+  
+  .status {
+    margin-top: 20px;
+    color: green;
+  }
+  
+  .back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    text-decoration: none;
+    color: #007bff;
+  }
+  
