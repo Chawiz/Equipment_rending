@@ -1,127 +1,56 @@
+# 🏗️ Equipment Renting DApp - Complete Documentation
 
-# 🗳️ Smart Voting System DApp
+![Dashboard Preview](./screenshot-dashboard.png)
+![Admin Panel Preview](./screenshot-admin.png)
 
-A decentralized voting system built using Solidity smart contracts and a React-based frontend, deployed on the local Ethereum blockchain using MetaMask and Hardhat.
+## 📌 Table of Contents
+1. [Project Overview](#-project-overview)
+2. [Key Features](#-key-features)
+3. [Technology Stack](#-technology-stack)
+4. [Smart Contract Architecture](#-smart-contract-architecture)
+5. [Frontend Structure](#-frontend-structure)
+6. [Installation Guide](#-installation-guide)
+7. [Configuration](#-configuration)
+8. [Workflow Explanation](#-workflow-explanation)
+9. [Testing Procedures](#-testing-procedures)
+10. [Deployment Guide](#-deployment-guide)
+11. [Security Measures](#-security-measures)
+12. [Contributing](#-contributing)
+13. [License](#-license)
 
----
+## 🌐 Project Overview
+This decentralized application (DApp) provides a blockchain-based solution for equipment rentals, featuring:
 
-## 🚀 Features
+- Transparent rental agreements
+- Secure payment handling via smart contracts
+- Automated approval workflows
+- Immutable record-keeping
 
-- Add, update, and delete:
-  - 🪪 Voters
-  - 👤 Candidates
-  - 📌 Positions
-- 🗳️ Vote by candidate name
-- 📊 Live voting results
-- 🔐 Admin-only access to management features
-- 🔄 Real-time event updates
-- ✅ MetaMask integration
+**Core Problem Solved:** Eliminates trust issues in equipment rentals through blockchain transparency while automating payment and approval processes.
 
----
+## ✨ Key Features
 
-## 🛠️ Tech Stack
+### User Features
+| Feature | Description | Technical Implementation |
+|---------|-------------|--------------------------|
+| Request Creation | Users can request equipment with specifications | React Form → Smart Contract |
+| Payment Handling | Automatic ETH calculation and processing | Ethers.js + Smart Contract Escrow |
+| History Tracking | View all past/current rentals | Smart Contract Events + Frontend Cache |
 
-- **Smart Contract**: Solidity
-- **Frontend**: React.js
-- **Wallet**: MetaMask
-- **Local Blockchain**: Hardhat or Ganache
-- **Event Handling**: Web3.js or Ethers.js
+### Admin Features
+| Feature | Description | Technical Implementation |
+|---------|-------------|--------------------------|
+| Request Approval | Approve/reject incoming requests | Admin-only Smart Contract Function |
+| Payment Management | Withdraw collected payments | Withdrawal Pattern Implementation |
+| Analytics Dashboard | View rental statistics | TheGraph (optional) + Custom Charts |
 
----
+## 🧩 Technology Stack
 
-## 📂 Project Structure
-
-```
-/src
-│
-├── App.js              # Main UI for both admin and voter
-├── index.js            # React entry point
-├── styles.css          # Application styling
-├── VotingSystem.json   # Compiled contract ABI
-```
-
----
-
-## 🧾 Prerequisites
-
-- [Node.js](https://nodejs.org/) & NPM
-- [MetaMask](https://metamask.io/)
-- [Hardhat](https://hardhat.org/) or Ganache
-- A local Ethereum network (like Hardhat Network)
-
----
-
-## ⚙️ Setup Instructions
-
-1. **Clone the repo**
-
-```bash
-git clone https://github.com/yourusername/voting-dapp.git
-cd voting-dapp
-```
-
-2. **Install dependencies**
-
-```bash
-npm install
-```
-
-3. **Compile Smart Contract**
-
-```bash
-npx hardhat compile
-```
-
-4. **Deploy the Contract**
-
-```bash
-npx hardhat run scripts/deploy.js --network localhost
-```
-
-> Make sure your local blockchain is running.
-
-5. **Connect MetaMask to Localhost**
-
-- Network: Custom RPC
-- RPC URL: `http://127.0.0.1:8545`
-- Chain ID: `31337` (Hardhat)
-
-6. **Start the React App**
-
-```bash
-npm start
-```
-
----
-
-## 🔐 Admin Access
-
-- Username: `Regis`
-- Password: `123`
-
----
-
-## 📸 Screenshots
-
-> Add screenshots of Admin Panel, Voting Form, and Results Table here
-<img width="875" alt="Screenshot 2025-05-04 014035" src="https://github.com/user-attachments/assets/73efb4ce-9a14-44a3-b372-b1fcda338108" />
-<img width="889" alt="Screenshot 2025-05-04 014150" src="https://github.com/user-attachments/assets/e331f230-cda6-467d-817d-41cf4dd9be3e" />
-<img width="907" alt="Screenshot 2025-05-04 014212" src="https://github.com/user-attachments/assets/b20d4c35-1343-430a-8dfe-6e98900e4f48" />
-
-<img width="920" alt="Voter" src="https://github.com/user-attachments/assets/4b055a1d-5199-4aa0-956e-cc9d4bb406c3" />
-
----
-
-## 📜 License
-
-This project is licensed under the MIT License. See the `LICENSE` file for more details.
-
----
-
-## 👨‍💻 Author
-
-**Regis Nkundimana**  
-_Rwanda, 2025_  
-[LinkedIn](https://www.linkedin.com/) | [GitHub](https://github.com/)
-
----
+### Core Components
+```mermaid
+graph LR
+    A[Frontend] --> B[Ethereum Blockchain]
+    A --> C[IPFS]
+    B --> D[Smart Contracts]
+    D --> E[Payment Processing]
+    D --> F[Access Control]
