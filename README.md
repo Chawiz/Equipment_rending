@@ -79,3 +79,11 @@ EquipmentLending.sol
 │   ├── requestEquipment() → payable
 │   ├── processRequest() → admin-only
 │   └── confirmReturn() → admin-only
+sequenceDiagram
+  User->>Frontend: Select Equipment
+  Frontend->>Smart Contract: requestEquipment()
+  Smart Contract->>Frontend: Emit RequestCreated
+  Admin->>Smart Contract: processRequest(approved)
+  Smart Contract->>User: Transfer equipment rights
+  User->>Smart Contract: requestReturn()
+  Admin->>Smart Contract: confirmReturn()
