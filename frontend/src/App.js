@@ -33,8 +33,6 @@ function App() {
   
   // Admin system
   const [isAdmin, setIsAdmin] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
 
   useEffect(() => {
     document.title = "Equipment Lending DApp";
@@ -63,7 +61,6 @@ function App() {
         const owner = await contract.owner();
         if (accounts[0].toLowerCase() === owner.toLowerCase()) {
           setIsAdmin(true);
-          localStorage.setItem('isAdmin', 'true');
         }
 
         loadData(contract, accounts[0]);
@@ -115,7 +112,7 @@ function App() {
           dueDate: new Date(Number(req[5]) * 1000).toLocaleString(),
           totalPrice: ethers.formatEther(req[6]),
           dailyPrice: ethers.formatEther(req[7]),
-          status: req[8],
+          status: Number(req[8]),
           adminComment: req[9],
           quantity: req[10] ? req[10].toString() : "1"
         };
@@ -138,23 +135,8 @@ function App() {
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
-  const handleAdminLogin = (e) => {
-    e.preventDefault();
-    if (username === 'admin' && password === 'admin123') {
-      setIsAdmin(true);
-      localStorage.setItem('isAdmin', 'true');
-      setMenu('equipment');
-      showMessage('success', 'Admin login successful!');
-      setUsername('');
-      setPassword('');
-    } else {
-      showMessage('danger', 'Invalid credentials');
-    }
-  };
-
   const handleLogout = () => {
     setIsAdmin(false);
-    localStorage.removeItem('isAdmin');
     setMenu('dashboard');
     showMessage('success', 'Logged out successfully');
   };
@@ -263,11 +245,13 @@ function App() {
     }
 
     try {
-      await contract.processRequest(
+      const tx = await contract.processRequest(
         requestId,
         approve,
         adminComment || (approve ? 'Approved' : 'Rejected')
       );
+      await tx.wait();
+      
       setAdminComment('');
       setProcessingRequest(null);
       showMessage('success', `Request ${approve ? 'approved' : 'rejected'}`);
@@ -284,7 +268,7 @@ function App() {
     }
 
     try {
-      const tx = await contract.returnEquipment(requestId);
+      const tx = await contract.requestReturn(requestId);
       await tx.wait();
       showMessage('success', 'Return request submitted');
       loadData();
@@ -329,7 +313,7 @@ function App() {
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
       <div className="container-fluid">
         <span className="navbar-brand">
-          <img src={logo} alt="Logo" width="30" className="me-2" />
+          <img src={logo} alt="Logo" width="100" className="me-2" />
           Equipment Lending
         </span>
         <div className="d-flex">
@@ -345,14 +329,6 @@ function App() {
           >
             <i className="bi bi-list-check me-1"></i> My Requests
           </button>
-          {!isAdmin && (
-            <button 
-              className="btn btn-outline-light ms-2"
-              onClick={() => setMenu('login')}
-            >
-              <i className="bi bi-shield-lock me-1"></i> Admin Login
-            </button>
-          )}
         </div>
       </div>
     </nav>
@@ -362,7 +338,7 @@ function App() {
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
       <div className="container-fluid">
         <span className="navbar-brand">
-          <img src={logo} alt="Logo" width="30" className="me-2" />
+          <img src={logo} alt="Logo" width="100" className="me-2" />
           Admin Panel
         </span>
         <div className="d-flex">
@@ -400,29 +376,18 @@ function App() {
             <button type="button" className="btn-close" onClick={() => setProcessingRequest(null)}></button>
           </div>
           <div className="modal-body">
-            {processingRequest?.status === 0 && (
-              <div className="mb-3">
-                <label className="form-label">Request Details</label>
-                <div className="card bg-light p-3 mb-3">
-                  <p><strong>Equipment:</strong> {processingRequest.equipmentName}</p>
-                  <p><strong>Quantity:</strong> {processingRequest.quantity}</p>
-                  <p><strong>Request Date:</strong> {processingRequest.requestDate}</p>
-                  <p><strong>Due Date:</strong> {processingRequest.dueDate}</p>
-                  <p><strong>Total Price:</strong> {processingRequest.totalPrice} ETH</p>
-                </div>
+            <div className="mb-3">
+              <label className="form-label">Request Details</label>
+              <div className="card bg-light p-3 mb-3">
+                <p><strong>Equipment:</strong> {processingRequest?.equipmentName}</p>
+                <p><strong>Quantity:</strong> {processingRequest?.quantity}</p>
+                <p><strong>Borrower:</strong> {processingRequest?.borrower.substring(0, 6)}...{processingRequest?.borrower.substring(38)}</p>
+                <p><strong>Request Date:</strong> {processingRequest?.requestDate}</p>
+                <p><strong>Due Date:</strong> {processingRequest?.dueDate}</p>
+                <p><strong>Total Price:</strong> {processingRequest?.totalPrice} ETH</p>
+                <p><strong>Status:</strong> {renderStatusBadge(processingRequest?.status)}</p>
               </div>
-            )}
-            {processingRequest?.status === 3 && (
-              <div className="mb-3">
-                <label className="form-label">Return Details</label>
-                <div className="card bg-light p-3 mb-3">
-                  <p><strong>Equipment:</strong> {processingRequest.equipmentName}</p>
-                  <p><strong>Quantity:</strong> {processingRequest.quantity}</p>
-                  <p><strong>Borrower:</strong> {processingRequest.borrower.substring(0, 6)}...{processingRequest.borrower.substring(38)}</p>
-                  <p><strong>Status:</strong> {renderStatusBadge(processingRequest.status)}</p>
-                </div>
-              </div>
-            )}
+            </div>
             <div className="mb-3">
               <label className="form-label">Comments</label>
               <textarea
@@ -481,44 +446,6 @@ function App() {
         <div className={`alert alert-${message.type} alert-dismissible fade show`}>
           {message.text}
           <button type="button" className="btn-close" onClick={() => setMessage({ type: '', text: '' })}></button>
-        </div>
-      )}
-
-      {/* Admin Login */}
-      {menu === 'login' && (
-        <div className="card border-danger mx-auto" style={{ maxWidth: '400px' }}>
-          <div className="card-header bg-danger text-white">
-            <h5 className="mb-0 text-center">Admin Login</h5>
-          </div>
-          <div className="card-body">
-            <form onSubmit={handleAdminLogin}>
-              <div className="mb-3">
-                <label className="form-label">Username</label>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  value={username} 
-                  onChange={(e) => setUsername(e.target.value)} 
-                  required 
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Password</label>
-                <input 
-                  type="password" 
-                  className="form-control" 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  required 
-                />
-              </div>
-              <div className="d-grid">
-                <button type="submit" className="btn btn-danger">
-                  <i className="bi bi-shield-lock me-1"></i> Login
-                </button>
-              </div>
-            </form>
-          </div>
         </div>
       )}
 
@@ -823,13 +750,11 @@ function App() {
                 </thead>
                 <tbody>
                   {requests.map((req) => (
-                    <tr key={req.id} className={`status-${req.status}`}>
+                    <tr key={req.id}>
                       <td>{req.id}</td>
                       <td>{req.equipmentName}</td>
                       <td>
-                        <span className="user-badge">
-                          {req.borrower.substring(0, 6)}...{req.borrower.substring(38)}
-                        </span>
+                        {req.borrower.substring(0, 6)}...{req.borrower.substring(38)}
                       </td>
                       <td>{req.quantity}</td>
                       <td>
@@ -842,25 +767,23 @@ function App() {
                       <td>{renderStatusBadge(req.status)}</td>
                       <td>
                         {req.status === 0 && (
-                          <>
-                            <button
-                              className="btn btn-success btn-sm me-2"
-                              onClick={() => handleProcessRequest(req.id, true)}
-                            >
-                              <i className="bi bi-check me-1"></i> Approve
-                            </button>
-                            <button
-                              className="btn btn-danger btn-sm"
-                              onClick={() => handleProcessRequest(req.id, false)}
-                            >
-                              <i className="bi bi-x me-1"></i> Reject
-                            </button>
-                          </>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => {
+                              setProcessingRequest(req);
+                              setAdminComment('');
+                            }}
+                          >
+                            <i className="bi bi-gear me-1"></i> Process
+                          </button>
                         )}
                         {req.status === 3 && (
                           <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleConfirmReturn(req.id)}
+                            className="btn btn-info btn-sm"
+                            onClick={() => {
+                              setProcessingRequest(req);
+                              setAdminComment('');
+                            }}
                           >
                             <i className="bi bi-check-circle me-1"></i> Confirm Return
                           </button>
@@ -898,7 +821,7 @@ function App() {
                 </thead>
                 <tbody>
                   {userRequests.map((req) => (
-                    <tr key={req.id} className={`status-${req.status}`}>
+                    <tr key={req.id}>
                       <td>{req.id}</td>
                       <td>{req.equipmentName}</td>
                       <td>{req.quantity}</td>
@@ -907,9 +830,9 @@ function App() {
                       <td>{req.totalPrice} ETH</td>
                       <td>{renderStatusBadge(req.status)}</td>
                       <td>
-                        {req.status === 0 && (
+                        {req.status === 1 && (
                           <button
-                            className="btn btn-outline-primary btn-sm"
+                            className="btn btn-primary btn-sm"
                             onClick={() => handleReturnEquipment(req.id)}
                           >
                             <i className="bi bi-arrow-return-left me-1"></i> Return
@@ -929,3 +852,4 @@ function App() {
 }
 
 export default App;
+
